@@ -1,0 +1,36 @@
+# Dossiers dépendances
+/vendor/
+/composer.lock
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Fichiers d'environnement
+.env
+.env.local
+.env.*.local
+
+# Config perso IDE
+/.idea/
+/.vscode/
+
+# Fichiers temporaires
+*.tmp
+*.swp
+
+# Cache
+/cache/
+/var/cache/
+/var/log/
+
+# PHPUnit
+/phpunit.result.cache
+
+# Node (si jamais tu mixes avec front)
+node_modules/
+dist/
+build/
