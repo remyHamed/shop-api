@@ -6,12 +6,17 @@ use function FastRoute\simpleDispatcher;
 use App\Http\Controller\StoreController;
 use App\Http\Controller\AuthController;
 use App\Http\Controller\UserController;
+use App\Http\Controller\ProductController;
 use App\Http\Middleware\AuthMiddleware;
 use App\Security\JwtHandler;
 use App\Repository\Interfaces\StoreRepositoryInterface;
 use App\Repository\Interfaces\UserRepositoryInterface;
+use App\Repository\Interfaces\ProductRepositoryInterface;
+use App\Repository\Interfaces\SaleRepositoryInterface;
 use App\Repository\Persistence\SqlStoreRepository;
 use App\Repository\Persistence\SqlUserRepository;
+use App\Repository\Persistence\SqlProductRepository;
+use App\Repository\Persistence\SqlSaleRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -27,8 +32,10 @@ $containerBuilder->addDefinitions([
     },
     JwtHandler::class => \DI\create(),
 
-    StoreRepositoryInterface::class => \DI\autowire(SqlStoreRepository::class),
-    UserRepositoryInterface::class => \DI\autowire(SqlUserRepository::class),
+    StoreRepositoryInterface::class   => \DI\autowire(SqlStoreRepository::class),
+    UserRepositoryInterface::class    => \DI\autowire(SqlUserRepository::class),
+    ProductRepositoryInterface::class => \DI\autowire(SqlProductRepository::class),
+    SaleRepositoryInterface::class    => \DI\autowire(SqlSaleRepository::class),
 ]);
 $container = $containerBuilder->build();
 
@@ -37,8 +44,11 @@ $dispatcher = simpleDispatcher(function(RouteCollector $r) {
         $r->addRoute('POST', '/login', [AuthController::class, 'login']);
         $r->addRoute('POST', '/register', [UserController::class, 'register']);
         $r->addRoute('POST', '/users/employee', [UserController::class, 'createEmployee']);
-        $r->addRoute('GET', '/stores', [StoreController::class, 'list']);
+        $r->addRoute('GET',  '/stores', [StoreController::class, 'list']);
         $r->addRoute('POST', '/stores', [StoreController::class, 'create']);
+        $r->addRoute('GET',  '/stores/{storeId:\d+}/products', [ProductController::class, 'listByStore']);
+        $r->addRoute('POST', '/products', [ProductController::class, 'create']);
+        $r->addRoute('POST', '/products/{productId:\d+}/sell', [ProductController::class, 'sell']);
     });
 });
 
@@ -62,15 +72,18 @@ switch ($routeInfo[0]) {
         $vars = $routeInfo[2];   
 
         try {
-            
+            $auth = $container->get(AuthMiddleware::class);
+
             if ($handler[0] === StoreController::class && $httpMethod === 'POST') {
-                $auth = $container->get(AuthMiddleware::class);
                 $auth->check('ROLE_EMPLOYEE'); 
             }
 
             if ($handler[0] === UserController::class && $handler[1] === 'createEmployee') {
-                $auth = $container->get(AuthMiddleware::class);
                 $auth->check('ROLE_ADMIN'); 
+            }
+
+            if ($handler[0] === ProductController::class && $httpMethod === 'POST') {
+                $auth->check('ROLE_EMPLOYEE');
             }
 
             $controller = $container->get($handler[0]);

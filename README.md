@@ -23,11 +23,36 @@ il sera ecrit ready to connect quand ce sera bon.
 
 2. Initialiser l'administrateur
 
-Pour tester les routes sécurisées (POST), vous devez créer un compte administrateur. Exécutez cette commande dans votre terminal :
+Pour tester les routes sécurisées (POST), vous devez créer un compte administrateur. Suivez cette procédure :
+
+Créez un fichier nommé init.php à la racine du projet.
+
+Collez le code suivant à l'intérieur :
+
+```php
+<?php
+try {
+    $pdo = new PDO('mysql:host=db;dbname=store_db', 'root', 'root');
+    $hash = password_hash('admin', PASSWORD_BCRYPT);
+
+    $pdo->prepare("DELETE FROM users WHERE email = 'admin@test.com'")->execute();
+
+    $stmt = $pdo->prepare("INSERT INTO users (email, password, role) VALUES (?, ?, 'ROLE_ADMIN')");
+    $stmt->execute(['admin@test.com', $hash]);
+
+    echo "✅ Compte administrateur créé avec succès !\n";
+} catch (Exception $e) {
+    echo "❌ Erreur : " . $e->getMessage() . "\n";
+}
+```
+
+Exécutez le script via Docker :
 
 ```bash
-docker exec -it store_api_db mysql -u root -proot store_db -e "INSERT INTO users (email, password, role) VALUES ('admin@test.com', '\$2y\$10\$U5W0Xq.Z7dK2yG1mZ.X7ueY9X8eH6vB6h1.R.YxY/Z8mY/XqY/YmY', 'ROLE_ADMIN');"
+docker exec -it store_api_php php init.php
 ```
+
+Supprimez le fichier init.php
 
 Identifiants de test
 
