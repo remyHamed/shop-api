@@ -1,6 +1,5 @@
 # Dossiers dépendances
 /vendor/
-/composer.lock
 
 # Fichiers système
 .DS_Store
