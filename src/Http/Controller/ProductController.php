@@ -31,4 +31,28 @@ class ProductController
             return ['error' => $e->getMessage()];
         }
     }
+
+    public function update(array $vars): array
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+        try {
+            $product = $this->productService->updateProduct((int)$vars['id'], $data);
+            return $product->toArray();
+        } catch (\Exception $e) {
+            http_response_code(400);
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    public function delete(array $vars): array
+    {
+        try {
+            $this->productService->deleteProduct((int)$vars['id']);
+            http_response_code(204); // Succès sans contenu
+            return [];
+        } catch (\Exception $e) {
+            http_response_code(400);
+            return ['error' => $e->getMessage()];
+        }
+    }
 }

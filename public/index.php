@@ -49,6 +49,8 @@ $dispatcher = simpleDispatcher(function(RouteCollector $r) {
         $r->addRoute('GET',  '/stores/{storeId:\d+}/products', [ProductController::class, 'listByStore']);
         $r->addRoute('POST', '/products', [ProductController::class, 'create']);
         $r->addRoute('POST', '/products/{productId:\d+}/sell', [ProductController::class, 'sell']);
+        $r->addRoute('PUT', '/api/products/{id:\d+}', [ProductController::class, 'update']);
+        $r->addRoute('DELETE', '/api/products/{id:\d+}', [ProductController::class, 'delete']);
     });
 });
 
